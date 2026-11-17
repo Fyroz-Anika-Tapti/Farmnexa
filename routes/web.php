@@ -1,7 +1,97 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\FarmController;
+use App\Http\Controllers\SectionController;
+use App\Http\Controllers\AnimalController;
+use App\Http\Controllers\CostCentreController;
+use App\Http\Controllers\PoultryBatchController;
+use App\Http\Controllers\AnimalSaleController;
+
 
 Route::get('/', function () {
     return view('layouts.welcome');
+});
+
+
+Auth::routes();
+
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+
+
+Route::get('/test-permission', function () {
+    $user = auth()->user();
+
+    if (!$user) {
+        return 'first login to view this page: <a href="/login">Login</a>';
+    }
+
+    return response()->json([
+        'user'           => $user->email,
+        'roles'          => $user->getRoleNames(),
+        'all_permissions'=> $user->getAllPermissions()->pluck('name'),
+        'can_farm_view'  => $user->can('farm.view'),
+        'can_farm_edit'  => $user->can('farm.edit'),
+        'can_animal_view'=> $user->can('animal.view'),
+        'can_role_delete'=> $user->can('role.delete'),
+    ]);
+})->middleware('auth');
+
+
+
+Route::middleware(['auth', 'permission:farm.view'])->get('/farms-test', function () {
+    return '✅ you have the farm.view permission — welcome!';
+});
+
+
+
+Route::middleware(['auth', 'role:Owner'])->get('/owner-test', function () {
+    return '👑 you are the Owner — this page is for Owners only!';
+});
+
+
+
+Route::middleware(['auth', 'permission:farm.create|farm.edit'])->get('/farms-manage', function () {
+    return '✅ you have either the farm.create or farm.edit permission — welcome!';
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('farms', FarmController::class);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('farms', FarmController::class);
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('farms', FarmController::class);
+    Route::resource('sections', SectionController::class)->except(['show']);
+
+    Route::resource('animals', AnimalController::class)->except(['show']); 
+     //  Animal Weight Event 
+    Route::get('animals/{animal}/weights', [App\Http\Controllers\AnimalWeightController::class, 'index'])->name('animals.weights.index');
+    Route::get('animals/{animal}/weights/create', [App\Http\Controllers\AnimalWeightController::class, 'create'])->name('animals.weights.create');
+    Route::post('animals/{animal}/weights', [App\Http\Controllers\AnimalWeightController::class, 'store'])->name('animals.weights.store');
+    Route::delete('weights/{weight}', [App\Http\Controllers\AnimalWeightController::class, 'destroy'])->name('animals.weights.destroy');  
+
+    //  Animal Health Event 
+Route::get('animals/{animal}/health', [App\Http\Controllers\AnimalHealthController::class, 'index'])->name('animals.health.index');
+Route::get('animals/{animal}/health/create', [App\Http\Controllers\AnimalHealthController::class, 'create'])->name('animals.health.create');
+Route::post('animals/{animal}/health', [App\Http\Controllers\AnimalHealthController::class, 'store'])->name('animals.health.store');
+Route::delete('health/{event}', [App\Http\Controllers\AnimalHealthController::class, 'destroy'])->name('animals.health.destroy');
+Route::resource('animal-sales', AnimalSaleController::class)->except(['show']);
+
+
+    Route::resource('cost-centres', CostCentreController::class)->except(['show']);
+    Route::resource('poultry-batches', PoultryBatchController::class)->except(['show']);
+    //  Poultry Daily Activities Nested)
+Route::get('poultry-batches/{batch}/daily', [App\Http\Controllers\PoultryDailyActivityController::class, 'index'])->name('poultry-batches.daily.index');
+Route::get('poultry-batches/{batch}/daily/create', [App\Http\Controllers\PoultryDailyActivityController::class, 'create'])->name('poultry-batches.daily.create');
+Route::post('poultry-batches/{batch}/daily', [App\Http\Controllers\PoultryDailyActivityController::class, 'store'])->name('poultry-batches.daily.store');
+Route::delete('poultry-daily/{activity}', [App\Http\Controllers\PoultryDailyActivityController::class, 'destroy'])->name('poultry-batches.daily.destroy');
+
+
 });
