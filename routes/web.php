@@ -8,7 +8,11 @@ use App\Http\Controllers\AnimalController;
 use App\Http\Controllers\CostCentreController;
 use App\Http\Controllers\PoultryBatchController;
 use App\Http\Controllers\AnimalSaleController;
-
+use App\Http\Controllers\MilkProductionController;
+use App\Http\Controllers\EggProductionController;
+use App\Http\Controllers\MilkProcessingController;
+use App\Http\Controllers\InventoryItemController;
+use App\Http\Controllers\StockMovementController;
 
 Route::get('/', function () {
     return view('layouts.welcome');
@@ -92,6 +96,14 @@ Route::get('poultry-batches/{batch}/daily', [App\Http\Controllers\PoultryDailyAc
 Route::get('poultry-batches/{batch}/daily/create', [App\Http\Controllers\PoultryDailyActivityController::class, 'create'])->name('poultry-batches.daily.create');
 Route::post('poultry-batches/{batch}/daily', [App\Http\Controllers\PoultryDailyActivityController::class, 'store'])->name('poultry-batches.daily.store');
 Route::delete('poultry-daily/{activity}', [App\Http\Controllers\PoultryDailyActivityController::class, 'destroy'])->name('poultry-batches.daily.destroy');
+
+Route::resource('milk-productions', MilkProductionController::class)->except(['show', 'edit', 'update']);
+Route::resource('milk-processings', MilkProcessingController::class)->except(['show', 'edit', 'update']);
+
+Route::resource('egg-productions', EggProductionController::class)->except(['show', 'edit', 'update']);
+
+Route::resource('inventory-items', InventoryItemController::class)->except(['show']);
+Route::resource('stock-movements', StockMovementController::class)->only(['index', 'create', 'store']);
 
 
 });

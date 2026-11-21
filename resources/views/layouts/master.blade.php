@@ -141,15 +141,59 @@
             </li>
             @endcan
 
-          <!-- Inventory (Future) -->
-          @can('farm.view')
-          <li class="nav-item">
-            <a href="#" class="nav-link">
-              <i class="nav-icon fas fa-boxes"></i>
-              <p>Inventory</p>
-            </a>
+            <li class="nav-item">
+              <a href="{{ route('milk-productions.index') }}" class="nav-link {{ request()->routeIs('milk-productions.*') ? 'active' : '' }}">
+                  <i class="nav-icon fas fa-glass-whiskey"></i>
+                  <p>Milk Production</p>
+              </a>
           </li>
-          @endcan
+
+          <li class="nav-item">
+            <a href="{{ route('milk-processings.index') }}" class="nav-link {{ request()->routeIs('milk-processings.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-blender"></i>
+                <p>Milk Processing</p>
+            </a>
+        </li>
+
+          <li class="nav-item">
+            <a href="{{ route('egg-productions.index') }}" class="nav-link {{ request()->routeIs('egg-productions.*') ? 'active' : '' }}">
+                <i class="nav-icon fas fa-egg"></i>
+                <p>Egg Production</p>
+            </a>
+        </li>
+
+          <!-- Inventory -->
+@can('farm.view')
+<li class="nav-item {{ request()->routeIs('inventory-*') ? 'menu-open' : '' }}">
+    <a href="#" class="nav-link {{ request()->routeIs('inventory-*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-boxes"></i>
+        <p>
+            Inventory
+            <i class="right fas fa-angle-left"></i>
+        </p>
+    </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item">
+            <a href="{{ route('inventory-items.index') }}" class="nav-link {{ request()->routeIs('inventory-items.*') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Items</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="#" class="nav-link">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Locations</p>
+            </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('stock-movements.index') }}" class="nav-link {{ request()->routeIs('stock-movements.*') ? 'active' : '' }}">
+              <i class="far fa-circle nav-icon"></i>
+              <p>Stock Movements</p>
+          </a>
+      </li>
+    </ul>
+</li>
+@endcan
 
           <!-- ADMIN Section -->
           @role('Owner')

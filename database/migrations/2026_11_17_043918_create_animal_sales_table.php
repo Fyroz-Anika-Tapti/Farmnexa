@@ -23,6 +23,7 @@ return new class extends Migration
             $table->string('status', 30)->default('completed');
             $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
