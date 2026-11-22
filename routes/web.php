@@ -13,6 +13,8 @@ use App\Http\Controllers\EggProductionController;
 use App\Http\Controllers\MilkProcessingController;
 use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\StockMovementController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PurchaseOrderController;
 
 Route::get('/', function () {
     return view('layouts.welcome');
@@ -104,6 +106,9 @@ Route::resource('egg-productions', EggProductionController::class)->except(['sho
 
 Route::resource('inventory-items', InventoryItemController::class)->except(['show']);
 Route::resource('stock-movements', StockMovementController::class)->only(['index', 'create', 'store']);
-
+Route::resource('suppliers', SupplierController::class)->except(['show']);
+Route::resource('purchase-orders', PurchaseOrderController::class);
+Route::get('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receiveForm'])->name('purchase-orders.receive');
+Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receiveStore'])->name('purchase-orders.receive.store');
 
 });

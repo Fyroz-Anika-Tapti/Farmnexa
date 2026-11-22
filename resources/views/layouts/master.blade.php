@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>@yield('title', 'Dashboard') | BIRD Farm Management</title>
+  <title>@yield('title', 'Dashboard') | FarmNexa</title>
 
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
   <link rel="stylesheet" href="{{ asset('assets/plugins/fontawesome-free/css/all.min.css') }}">
@@ -55,7 +55,7 @@
     <!-- Brand Logo -->
     <a href="{{ route('home') }}" class="brand-link">
       <img src="{{ asset('assets/dist/img/AdminLTELogo.png') }}" alt="Logo" class="brand-image img-circle elevation-3" style="opacity: .8">
-      <span class="brand-text font-weight-light">BIRD Farm System</span>
+      <span class="brand-text font-weight-light">FarmNexa</span>
     </a>
 
     <!-- Sidebar -->
@@ -194,6 +194,19 @@
     </ul>
 </li>
 @endcan
+    <li class="nav-header">PROCUREMENT</li>
+      <li class="nav-item">
+          <a href="{{ route('suppliers.index') }}" class="nav-link {{ request()->routeIs('suppliers.*') ? 'active' : '' }}">
+              <i class="nav-icon fas fa-truck"></i>
+              <p>Suppliers</p>
+          </a>
+      </li>
+    <li class="nav-item">
+        <a href="{{ route('purchase-orders.index') }}" class="nav-link {{ request()->routeIs('purchase-orders.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-file-invoice"></i>
+            <p>Purchase Orders</p>
+        </a>
+    </li>
 
           <!-- ADMIN Section -->
           @role('Owner')
@@ -262,7 +275,7 @@
 
   <!-- Footer -->
   <footer class="main-footer">
-    <strong>Copyright &copy; {{ date('Y') }} <a href="#">BIRD Farm Management</a>.</strong>
+    <strong>Copyright &copy; {{ date('Y') }} <a href="#">FarmNexa</a>.</strong>
     All rights reserved.
   </footer>
 </div>
