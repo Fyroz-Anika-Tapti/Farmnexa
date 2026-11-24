@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
   <link rel="stylesheet" href="{{ asset('assets/dist/css/adminlte.min.css') }}">
   <link rel="stylesheet" href="{{ asset('assets/plugins/overlayScrollbars/css/OverlayScrollbars.min.css') }}">
+   @stack('styles')
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 <div class="wrapper">
@@ -208,6 +209,36 @@
         </a>
     </li>
 
+    <!-- SALES -->
+@can('farm.view')
+<li class="nav-item {{ request()->routeIs('customers.*') || request()->routeIs('products.*') || request()->routeIs('sales-invoices.*') ? 'menu-open' : '' }}">
+    <a href="#" class="nav-link {{ request()->routeIs('customers.*') || request()->routeIs('products.*') || request()->routeIs('sales-invoices.*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-cash-register"></i>
+        <p>Sales <i class="right fas fa-angle-left"></i></p>
+    </a>
+    <ul class="nav nav-treeview">
+        <li class="nav-item">
+            <a href="{{ route('customers.index') }}" class="nav-link {{ request()->routeIs('customers.*') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Customers</p>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="{{ route('products.index') }}" class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}">
+                <i class="far fa-circle nav-icon"></i>
+                <p>Products</p>
+            </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('sales-invoices.index') }}" class="nav-link {{ request()->routeIs('sales-invoices.*') ? 'active' : '' }}">
+              <i class="far fa-circle nav-icon"></i>
+              <p>Sales Invoices</p>
+          </a>
+      </li>
+    </ul>
+</li>
+@endcan
+
           <!-- ADMIN Section -->
           @role('Owner')
           <li class="nav-header">SYSTEM ADMIN</li>
@@ -285,5 +316,7 @@
 <script src="{{ asset('assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('assets/plugins/overlayScrollbars/js/jquery.overlayScrollbars.min.js') }}"></script>
 <script src="{{ asset('assets/dist/js/adminlte.min.js') }}"></script>
+
+@stack('scripts')
 </body>
 </html>

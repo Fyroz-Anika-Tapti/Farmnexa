@@ -15,7 +15,9 @@ use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\StockMovementController;
 use App\Http\Controllers\SupplierController;
 use App\Http\Controllers\PurchaseOrderController;
-
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\SalesInvoiceController;
 Route::get('/', function () {
     return view('layouts.welcome');
 });
@@ -111,4 +113,7 @@ Route::resource('purchase-orders', PurchaseOrderController::class);
 Route::get('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receiveForm'])->name('purchase-orders.receive');
 Route::post('purchase-orders/{purchaseOrder}/receive', [PurchaseOrderController::class, 'receiveStore'])->name('purchase-orders.receive.store');
 
+Route::resource('customers', CustomerController::class)->except(['show']);
+Route::resource('products', ProductController::class)->except(['show']);
+Route::resource('sales-invoices', SalesInvoiceController::class)->except(['edit', 'update']);
 });
