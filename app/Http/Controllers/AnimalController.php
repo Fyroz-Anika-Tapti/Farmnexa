@@ -49,7 +49,12 @@ class AnimalController extends Controller
 
         return redirect()->route('animals.index')->with('success', 'Animal created successfully!');
     }
-
+    
+    public function show(Animal $animal)
+   {
+    $animal->load(['farm', 'section', 'weights', 'healthEvents', 'feedRecords', 'expenses', 'sale']);
+    return view('animals.show', compact('animal'));
+  }
     public function edit(Animal $animal)
     {
         $farms    = Farm::where('status', 'active')->get();

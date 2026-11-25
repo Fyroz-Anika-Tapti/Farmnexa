@@ -123,6 +123,12 @@
                 </a>
             </li>
             @endcan
+            <li class="nav-item">
+    <a href="{{ route('animal-expenses.page') }}" class="nav-link {{ request()->routeIs('animal-expenses.*') ? 'active' : '' }}">
+        <i class="far fa-circle nav-icon"></i>
+        <p>Animal Expenses</p>
+    </a>
+</li>
             
             @can('animal.view')
           <li class="nav-item">

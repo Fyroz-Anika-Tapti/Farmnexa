@@ -43,4 +43,47 @@ class Animal extends Model
     {
     return $this->hasMany(AnimalHealthEvent::class);
     }
+    public function feedRecords()
+{
+    return $this->hasMany(AnimalFeedRecord::class);
+}
+
+public function expenses()
+{
+    return $this->hasMany(AnimalExpense::class);
+}
+
+public function sale()
+{
+    return $this->hasOne(AnimalSale::class)->latestOfMany();
+}
+
+public function getTotalFeedCostAttribute()
+{
+    return $this->feedRecords()->sum('total_cost');
+}
+
+public function getTotalMedicineCostAttribute()
+{
+    return $this->healthEvents()->sum('medicine_cost');
+}
+
+public function getTotalOtherExpenseAttribute()
+{
+    return $this->expenses()->sum('amount');
+}
+
+public function getTotalCostAttribute()
+{
+    return ($this->purchase_value ?? 0)
+         + $this->total_medicine_cost
+         + $this->total_feed_cost
+         + $this->total_other_expense;
+}
+
+public function getProfitAttribute()
+{
+    $salePrice = $this->sale->selling_price ?? 0;
+    return $salePrice - $this->total_cost;
+}
 }
