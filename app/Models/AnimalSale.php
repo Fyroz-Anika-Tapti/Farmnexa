@@ -22,6 +22,10 @@ class AnimalSale extends Model
         'status',
         'notes',
     ];
+    
+     protected $casts = [
+        'sale_date' => 'date',
+    ];
 
     public function animal()
     {

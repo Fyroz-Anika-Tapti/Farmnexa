@@ -53,17 +53,20 @@
                             {{ number_format($sale->selling_price - $sale->proceeds_received, 2) }} BDT
                         </td>
                         <td>
-                        <a href="{{ route('animal-sales.edit', $sale) }}" class="btn btn-info btn-sm" title="Edit">
-                            <i class="fas fa-edit"></i>
-                        </a>
-                        <form action="{{ route('animal-sales.destroy', $sale) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this sale?')">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-danger btn-sm" title="Delete">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </form>
-                    </td>
+                            <a href="{{ route('animal-sales.show', $sale) }}" class="btn btn-info btn-sm" title="View">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                            <a href="{{ route('animal-sales.invoice', $sale) }}" class="btn btn-primary btn-sm" title="Print Invoice" target="_blank">
+                                <i class="fas fa-print"></i>
+                            </a>
+                            <form action="{{ route('animal-sales.destroy', $sale) }}" method="POST" style="display:inline" onsubmit="return confirm('Delete this sale?')">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-sm" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>

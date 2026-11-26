@@ -121,7 +121,7 @@ Route::get('animal-sales/carrying-value/{animal}', [AnimalSaleController::class,
 // Invoice
 Route::get('animal-sales/{animalSale}/invoice', [AnimalSaleController::class, 'invoice'])->name('animal-sales.invoice');
 
-Route::resource('animal-sales', AnimalSaleController::class)->except(['show']);
+Route::resource('animal-sales', AnimalSaleController::class)->except(['edit', 'update']);
 
 
     Route::resource('cost-centres', CostCentreController::class)->except(['show']);

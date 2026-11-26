@@ -59,7 +59,7 @@
                             <label>Profit Percentage (%)</label>
                             <input type="number" step="0.01" name="profit_percentage" id="profit_percent"
                                    class="form-control" value="{{ old('profit_percentage', 0) }}" placeholder="e.g. 20">
-                            <small class="text-muted">কত % লাভে বিক্রি করতে চান</small>
+                            <small class="text-muted">What percentage profit do you want to make?</small>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>Suggested Selling Price</label>
@@ -73,7 +73,7 @@
                             <label>Selling Price (BDT) <span class="text-danger">*</span></label>
                             <input type="number" step="0.01" name="selling_price" id="selling_price"
                                    class="form-control form-control-lg" value="{{ old('selling_price') }}" required>
-                            <small class="text-muted">চাইলে নিজে type করতে পারেন</small>
+                            <small class="text-muted">You can set your own desired selling price</small>
                         </div>
                         <div class="col-md-6 form-group">
                             <label>Proceeds Received (BDT)</label>
@@ -150,16 +150,17 @@
 @push('scripts')
 <script>
     let carryingValue = 0;
+    let manualPriceMode = false;  
 
-    const animalSelect = document.getElementById('animal_select');
-    const profitPercent = document.getElementById('profit_percent');
-    const sellingPrice = document.getElementById('selling_price');
+    const animalSelect    = document.getElementById('animal_select');
+    const profitPercent   = document.getElementById('profit_percent');
+    const sellingPrice    = document.getElementById('selling_price');
     const suggestedDisplay = document.getElementById('suggested_price_display');
-    const profitDisplay = document.getElementById('profit_display');
-    const costSection = document.getElementById('cost_section');
-    const noSelection = document.getElementById('no_selection');
+    const profitDisplay   = document.getElementById('profit_display');
+    const costSection     = document.getElementById('cost_section');
+    const noSelection     = document.getElementById('no_selection');
 
-    // Animal select
+    // Animal select → cost load
     animalSelect.addEventListener('change', function() {
         const animalId = this.value;
         if (!animalId) {
@@ -191,41 +192,54 @@
                 costSection.style.display = 'block';
                 noSelection.style.display = 'none';
 
-                recalculate();
+                // reset manual mode
+                manualPriceMode = false;
+                updateSuggestedAndProfit();
             })
             .catch(err => alert('Error: ' + err));
     });
 
-    // Profit % change → suggested price
-    profitPercent.addEventListener('input', recalculate);
+    // Profit % পরিবর্তন → suggested price আপডেট + selling price auto-fill
+    profitPercent.addEventListener('input', function() {
+        // % পরিবর্তন হলে manual mode reset — auto-fill হবে
+        manualPriceMode = false;
+        updateSuggestedAndProfit();
+    });
 
-    // Selling price change → profit recalculate
-    sellingPrice.addEventListener('input', recalculate);
+    // Selling Price — ইউজার নিজে type করলে manual mode on
+    sellingPrice.addEventListener('input', function() {
+        manualPriceMode = true;
+        updateProfitOnly();
+    });
 
-    function recalculate() {
+    // Suggested price & selling price auto-fill
+    function updateSuggestedAndProfit() {
         if (carryingValue <= 0) return;
 
         const percent = parseFloat(profitPercent.value) || 0;
         const suggested = carryingValue * (1 + percent / 100);
         suggestedDisplay.value = suggested.toFixed(2) + ' BDT';
 
-        // Selling price auto-fill from suggestion (only if % changed)
-        const currentSelling = parseFloat(sellingPrice.value);
-        if (!currentSelling || Math.abs(currentSelling - suggested) < 0.01 || percent > 0) {
-            if (!sellingPrice.dataset.manual || percent > 0) {
-                sellingPrice.value = suggested.toFixed(2);
-            }
+        // manual mode না হলে auto-fill
+        if (!manualPriceMode) {
+            sellingPrice.value = suggested.toFixed(2);
         }
 
-        const actualSelling = parseFloat(sellingPrice.value) || 0;
-        const profit = actualSelling - carryingValue;
-        profitDisplay.textContent = profit.toFixed(2);
-        profitDisplay.parentElement.parentElement.className = 'alert mb-0 ' + (profit >= 0 ? 'alert-success' : 'alert-danger');
+        updateProfitOnly();
     }
 
-    // Mark manual entry
-    sellingPrice.addEventListener('keyup', function() {
-        this.dataset.manual = 'true';
-    });
+    // শুধু profit recalculate
+    function updateProfitOnly() {
+        if (carryingValue <= 0) return;
+
+        const selling = parseFloat(sellingPrice.value) || 0;
+        const profit = selling - carryingValue;
+
+        profitDisplay.textContent = profit.toFixed(2);
+        const alertBox = profitDisplay.closest('.alert');
+        if (alertBox) {
+            alertBox.className = 'alert mb-0 ' + (profit >= 0 ? 'alert-success' : 'alert-danger');
+        }
+    }
 </script>
 @endpush
