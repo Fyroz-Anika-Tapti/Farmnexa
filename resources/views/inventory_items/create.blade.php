@@ -40,6 +40,7 @@
                         <option value="Feed"      {{ old('category') == 'Feed' ? 'selected' : '' }}>Feed (খাদ্য)</option>
                         <option value="Medicine"  {{ old('category') == 'Medicine' ? 'selected' : '' }}>Medicine (ঔষধ)</option>
                         <option value="Equipment" {{ old('category') == 'Equipment' ? 'selected' : '' }}>Equipment (যন্ত্রপাতি)</option>
+                        <option value="Milk"      {{ old('category') == 'Milk' ? 'selected' : '' }}>Milk (দুধ)</option>
                         <option value="Other"     {{ old('category') == 'Other' ? 'selected' : '' }}>Other</option>
                     </select>
                 </div>

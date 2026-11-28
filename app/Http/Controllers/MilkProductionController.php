@@ -8,6 +8,8 @@ use App\Models\Section;
 use App\Models\Animal;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\InventoryItem;
+use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
 
 class MilkProductionController extends Controller
@@ -121,61 +123,95 @@ class MilkProductionController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $data = $request->validate([
-            'farm_id'         => 'required|exists:farms,id',
-            'section_id'      => 'required|exists:sections,id',
-            'production_date' => 'required|date',
-            'shift'           => 'required|in:morning,evening',
-            'entries'         => 'required|array|min:1',
-            'entries.*.animal_id'       => 'nullable|exists:animals,id',
-            'entries.*.produced_liters' => 'required|numeric|min:0',
-            'entries.*.rejected_liters' => 'nullable|numeric|min:0',
-            'notes'           => 'nullable|string',
-        ]);
+{
+    $data = $request->validate([
+        'farm_id'         => 'required|exists:farms,id',
+        'section_id'      => 'required|exists:sections,id',
+        'production_date' => 'required|date',
+        'shift'           => 'required|in:morning,evening',
+        'cost_per_liter'  => 'required|numeric|min:0',   // 👈 নতুন
+        'entries'         => 'required|array|min:1',
+        'entries.*.animal_id'       => 'nullable|exists:animals,id',
+        'entries.*.produced_liters' => 'required|numeric|min:0',
+        'entries.*.rejected_liters' => 'nullable|numeric|min:0',
+        'notes'           => 'nullable|string',
+    ]);
 
-        $totalEntries = 0;
+    $totalEntries = 0;
+    $totalSaleableMilk = 0;
 
-        try {
-            DB::transaction(function () use ($data, &$totalEntries) {
-                foreach ($data['entries'] as $entry) {
-                    $produced = (float) $entry['produced_liters'];
-                    $rejected = (float) ($entry['rejected_liters'] ?? 0);
+    try {
+        DB::transaction(function () use ($data, &$totalEntries, &$totalSaleableMilk) {
+            foreach ($data['entries'] as $entry) {
+                $produced = (float) $entry['produced_liters'];
+                $rejected = (float) ($entry['rejected_liters'] ?? 0);
 
-                    if ($produced == 0 && $rejected == 0) continue;
+                if ($produced == 0 && $rejected == 0) continue;
 
-                    if ($rejected > $produced) {
-                        throw new \Exception("Rejected ({$rejected} L) cannot exceed produced ({$produced} L).");
-                    }
-
-                    MilkProduction::create([
-                        'farm_id'         => $data['farm_id'],
-                        'section_id'      => $data['section_id'],
-                        'animal_id'       => $entry['animal_id'] ?? null,
-                        'production_date' => $data['production_date'],
-                        'shift'           => $data['shift'],
-                        'produced_liters' => $produced,
-                        'rejected_liters' => $rejected,
-                        'saleable_liters' => $produced - $rejected,
-                        'notes'           => $data['notes'] ?? null,
-                        'recorded_by'     => Auth::id(),
-                    ]);
-
-                    $totalEntries++;
+                if ($rejected > $produced) {
+                    throw new \Exception("Rejected cannot exceed produced.");
                 }
-            });
-        } catch (\Exception $e) {
-            return back()->withErrors(['error' => $e->getMessage()])->withInput();
-        }
 
-        if ($totalEntries == 0) {
-            return back()->withErrors(['entries' => 'No valid entries provided.'])->withInput();
-        }
+                $saleable = $produced - $rejected;
 
-        return redirect()->route('milk-productions.create')
-            ->with('success', "{$totalEntries} milk entries saved successfully!");
+                MilkProduction::create([
+                    'farm_id'         => $data['farm_id'],
+                    'section_id'      => $data['section_id'],
+                    'animal_id'       => $entry['animal_id'] ?? null,
+                    'production_date' => $data['production_date'],
+                    'shift'           => $data['shift'],
+                    'produced_liters' => $produced,
+                    'rejected_liters' => $rejected,
+                    'saleable_liters' => $saleable,
+                    'cost_per_liter'  => $data['cost_per_liter'],   // 👈 নতুন
+                    'notes'           => $data['notes'] ?? null,
+                    'recorded_by'     => Auth::id(),
+                ]);
+
+                $totalSaleableMilk += $saleable;
+                $totalEntries++;
+            }
+
+            // Raw Milk Stock-এ In
+            if ($totalSaleableMilk > 0) {
+                $rawMilk = InventoryItem::where('item_code', 'MILK-RAW-001')->first();
+
+                if ($rawMilk) {
+                    $stockBefore = $rawMilk->current_stock;
+                    $avgBefore = $rawMilk->average_cost;
+
+                    // Stock add with weighted average
+                    $rawMilk->addStock($totalSaleableMilk, $data['cost_per_liter']);
+
+                    StockMovement::create([
+                        'inventory_item_id' => $rawMilk->id,
+                        'farm_id'           => $data['farm_id'],
+                        'movement_date'     => $data['production_date'],
+                        'movement_type'     => 'in',
+                        'quantity'          => $totalSaleableMilk,
+                        'unit_price'        => $data['cost_per_liter'],
+                        'total_value'       => $totalSaleableMilk * $data['cost_per_liter'],
+                        'stock_before'      => $stockBefore,
+                        'stock_after'       => $rawMilk->fresh()->current_stock,
+                        'reference_type'    => 'milk_production',
+                        'reference_no'      => 'MP-' . date('YmdHis'),
+                        'notes'             => "Milk Production ({$totalEntries} entries) @ {$data['cost_per_liter']} BDT/L",
+                        'recorded_by'       => Auth::id(),
+                    ]);
+                }
+            }
+        });
+    } catch (\Exception $e) {
+        return back()->withErrors(['error' => $e->getMessage()])->withInput();
     }
 
+    if ($totalEntries == 0) {
+        return back()->withErrors(['entries' => 'No valid entries.'])->withInput();
+    }
+
+    return redirect()->route('milk-productions.create')
+        ->with('success', "{$totalEntries} entries saved! Raw Milk +" . number_format($totalSaleableMilk, 2) . " L");
+}
     public function destroy(MilkProduction $milkProduction)
     {
         $milkProduction->delete();

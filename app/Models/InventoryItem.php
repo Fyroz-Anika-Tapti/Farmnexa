@@ -18,6 +18,8 @@ class InventoryItem extends Model
         'unit',
         'opening_stock',
         'current_stock',
+        'average_cost',   
+        'stock_value',    
         'reorder_level',
         'purchase_price',
         'description',
@@ -49,4 +51,36 @@ class InventoryItem extends Model
     {
         return $this->current_stock <= $this->reorder_level;
     }
+
+    /**
+ * Add stock with weighted average cost
+ */
+public function addStock($quantity, $unitPrice)
+{
+    $oldValue    = $this->current_stock * $this->average_cost;
+    $newValue    = $quantity * $unitPrice;
+    $newQty      = $this->current_stock + $quantity;
+    $newAvgCost  = $newQty > 0 ? ($oldValue + $newValue) / $newQty : 0;
+
+    $this->update([
+        'current_stock' => $newQty,
+        'average_cost'  => $newAvgCost,
+        'stock_value'   => $newQty * $newAvgCost,
+    ]);
+}
+
+/**
+ * Remove stock (keeps average cost same)
+ */
+public function removeStock($quantity)
+{
+    $newQty = max(0, $this->current_stock - $quantity);
+
+    $this->update([
+        'current_stock' => $newQty,
+        'stock_value'   => $newQty * $this->average_cost,
+    ]);
+}
+
+
 }

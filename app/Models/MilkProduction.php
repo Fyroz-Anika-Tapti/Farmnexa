@@ -19,6 +19,7 @@ class MilkProduction extends Model
         'produced_liters',
         'rejected_liters',
         'saleable_liters',
+        'cost_per_liter',
         'notes',
         'recorded_by',
     ];

@@ -19,9 +19,12 @@ class MilkProcessing extends Model
         'unit',
         'processing_cost',
         'selling_price_per_unit',
+        'milk_cost',             
         'notes',
         'recorded_by',
     ];
+
+    protected $casts = ['processing_date' => 'date'];
 
     public function farm()
     {
@@ -38,19 +41,18 @@ class MilkProcessing extends Model
         return $this->belongsTo(User::class, 'recorded_by');
     }
 
-    /**
-     * মোট বিক্রয়মূল্য (output_quantity × selling_price_per_unit)
-     */
     public function getTotalValueAttribute()
     {
         return ($this->output_quantity ?? 0) * ($this->selling_price_per_unit ?? 0);
     }
 
-    /**
-     * মোট খরচ (দুধের মূল্য বাদে শুধু processing cost)
-     */
     public function getTotalCostAttribute()
     {
-        return $this->processing_cost ?? 0;
+        return ($this->milk_cost ?? 0) + ($this->processing_cost ?? 0);
+    }
+
+    public function getProfitAttribute()
+    {
+        return $this->total_value - $this->total_cost;
     }
 }

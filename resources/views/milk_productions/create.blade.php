@@ -207,18 +207,27 @@
                     <label class="small font-weight-bold">DATE</label>
                     <input type="date" name="production_date" class="form-control" value="{{ old('production_date', date('Y-m-d')) }}" required>
                 </div>
-                <div class="col-md-3">
+                 <div class="col-md-2">
                     <label class="small font-weight-bold">SHIFT</label>
-                    <div>
-                        <label class="shift-btn {{ $autoShift === 'morning' ? 'active' : '' }}" id="btn_morning" style="cursor:pointer;">
-                            🌅 Morning
+                    <div class="d-flex">
+                        <label class="shift-btn flex-fill text-center {{ $autoShift === 'morning' ? 'active' : '' }}" id="btn_morning" style="cursor:pointer; padding: 8px;">
+                            🌅
                         </label>
-                        <label class="shift-btn {{ $autoShift === 'evening' ? 'active' : '' }}" id="btn_evening" style="cursor:pointer;">
-                            🌙 Evening
+                        <label class="shift-btn flex-fill text-center {{ $autoShift === 'evening' ? 'active' : '' }}" id="btn_evening" style="cursor:pointer; padding: 8px; margin-left: 5px;">
+                            🌙
                         </label>
                         <input type="hidden" name="shift" id="shift_input" value="{{ $autoShift }}" required>
                     </div>
-                </div>
+                 </div>
+
+                    <!-- 👇 নতুন Cost per Liter -->
+                    <div class="col-md-2">
+                        <label class="small font-weight-bold">COST/LITER</label>
+                        <div class="input-group">
+                            <input type="number" step="0.01" name="cost_per_liter" class="form-control" value="{{ old('cost_per_liter', 50) }}" min="0" required>
+                            <div class="input-group-append"><span class="input-group-text">BDT</span></div>
+                        </div>
+                    </div>
             </div>
         </div>
     </div>
